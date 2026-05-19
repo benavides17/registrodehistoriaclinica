@@ -1,2 +1,2 @@
 # registrodehistoriaclinica
-sitemadehospital.netlify.app
+https://sitemadehospital.netlify.app/
