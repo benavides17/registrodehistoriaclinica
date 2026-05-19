@@ -1,2 +1,2 @@
 # registrodehistoriaclinica
-https://hospitalhistoriaclinica.netlify.app/
+https://sistemadehospital.netlify.app/
