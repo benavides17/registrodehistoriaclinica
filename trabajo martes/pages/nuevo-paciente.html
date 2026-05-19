@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nuevo Paciente — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="../" class="nav-item">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="nueva.html" class="nav-item">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>
+      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>
+      <a href="buscar.html" class="nav-item">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-role" id="userRole">Rol</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesionUI()" style="width: 100%; margin-top: 10px; padding: 8px; background: #f4f1ec; border: 1px solid #d9cfc4; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Nuevo Paciente</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <div style="margin-bottom: 30px;">
+        <h1>➕ Registrar Nuevo Paciente</h1>
+        <p style="color: #8a8680;">Completa todos los datos para registrar un nuevo paciente en el sistema</p>
+      </div>
+
+      <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 600px;">
+        <form id="formNuevoPaciente" onsubmit="guardarNuevoPaciente(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label>Nombre Completo *</label>
+              <input type="text" id="nombrePaciente" placeholder="Ej. Juan García López" required />
+            </div>
+
+            <div class="form-group">
+              <label>Documento de Identidad *</label>
+              <input type="text" id="documentoPaciente" placeholder="Ej. 1234567890" required />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label>Fecha de Nacimiento *</label>
+              <input type="date" id="fechaNacimientoPaciente" required />
+            </div>
+
+            <div class="form-group">
+              <label>Sexo *</label>
+              <select id="sexoPaciente" required>
+                <option value="">-- Selecciona --</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="O">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label>Correo Electrónico *</label>
+              <input type="email" id="emailPaciente" placeholder="paciente@ejemplo.com" required />
+            </div>
+
+            <div class="form-group">
+              <label>Teléfono *</label>
+              <input type="tel" id="telefonoPaciente" placeholder="300 123 4567" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Dirección *</label>
+            <input type="text" id="direccionPaciente" placeholder="Calle 10 #5-45 Apto 301" required />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label>Tipo de Sangre</label>
+              <select id="tipoSangrePaciente">
+                <option value="">-- No especificado --</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Alergias</label>
+              <input type="text" id="allergiasPaciente" placeholder="Ej. Penicilina, Gluten" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Antecedentes Médicos</label>
+            <textarea id="antecedentePaciente" placeholder="Describe enfermedades previas, cirugías, etc." style="width: 100%; padding: 8px; border: 2px solid #e8e3db; border-radius: 6px; font-family: 'DM Sans', sans-serif; resize: vertical; min-height: 100px;"></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button type="submit" class="btn btn-primary">💾 Guardar Paciente</button>
+            <a href="pacientes.html" class="btn btn-ghost">✕ Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/storage.js"></script>
+  <script>
+    if (!estaAutenticado()) {
+      window.location.href = '../login.html';
+      throw new Error('No autenticado');
+    }
+
+    function mostrarUsuarioActual() {
+      const usuario = obtenerUsuarioActual();
+      if (usuario) {
+        document.getElementById('userName').textContent = usuario.nombre;
+        document.getElementById('userRole').textContent = usuario.rol;
+        document.getElementById('userAvatar').textContent = usuario.nombre.charAt(0).toUpperCase();
+      }
+    }
+
+    function cerrarSesionUI() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        cerrarSesion();
+        window.location.href = '../login.html';
+      }
+    }
+
+    function guardarNuevoPaciente(event) {
+      event.preventDefault();
+
+      const datos = {
+        nombre: document.getElementById('nombrePaciente').value.trim(),
+        documento: document.getElementById('documentoPaciente').value.trim(),
+        fechaNacimiento: document.getElementById('fechaNacimientoPaciente').value,
+        sexo: document.getElementById('sexoPaciente').value,
+        email: document.getElementById('emailPaciente').value.trim(),
+        telefono: document.getElementById('telefonoPaciente').value.trim(),
+        direccion: document.getElementById('direccionPaciente').value.trim(),
+        tipoSangre: document.getElementById('tipoSangrePaciente').value || 'No especificado',
+        alergias: document.getElementById('allergiasPaciente').value.trim(),
+        antecedentes: document.getElementById('antecedentePaciente').value.trim()
+      };
+
+      if (!datos.nombre || !datos.documento || !datos.email || !datos.telefono || !datos.direccion) {
+        alert('⚠️ Completa todos los campos requeridos (*)');
+        return;
+      }
+
+      const pacienteExistente = getPacienteByDocumento(datos.documento);
+      if (pacienteExistente) {
+        alert('⚠️ Ya existe un paciente con ese documento');
+        return;
+      }
+
+      upsertPaciente(datos);
+      alert('✅ Paciente registrado correctamente');
+      window.location.href = 'pacientes.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    mostrarUsuarioActual();
+  </script>
+</body>
+</html>

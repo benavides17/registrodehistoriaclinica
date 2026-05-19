@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nueva Historia — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="../" class="nav-item">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="nueva.html" class="nav-item active">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>
+      <a href="buscar.html" class="nav-item">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-role" id="userRole">Rol</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesionUI()" style="width: 100%; margin-top: 10px; padding: 8px; background: #f4f1ec; border: 1px solid #d9cfc4; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Nueva Historia Clínica</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Crear Nueva Historia</h1>
+        <p>Registra una nueva consulta o historia clínica</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Información del Paciente</div>
+        <form id="formularioHistoria">
+          <input type="hidden" id="idHistoria"/>
+          
+          <div class="form-grid">
+            <div class="field">
+              <label>Nombre del Paciente *</label>
+              <input type="text" id="pacienteNombre" placeholder="Ej. Juan García López" required/>
+            </div>
+            <div class="field">
+              <label>Documento de Identidad *</label>
+              <input type="text" id="pacienteDoc" placeholder="Ej. 1234567890" required/>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Motivo de Consulta *</label>
+              <input type="text" id="motivo" placeholder="Ej. Revisión general" required/>
+            </div>
+            <div class="field">
+              <label>Médico Tratante *</label>
+              <input type="text" id="medico" placeholder="Ej. Dr. López" required/>
+            </div>
+          </div>
+
+          <div class="form-grid full">
+            <div class="field">
+              <label>Diagnóstico</label>
+              <textarea id="diagnostico" placeholder="Describe el diagnóstico..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-grid full">
+            <div class="field">
+              <label>Tratamiento Recomendado</label>
+              <textarea id="tratamiento" placeholder="Especifica el tratamiento..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" onclick="guardarFormulario()">
+              💾 Guardar Historia
+            </button>
+            <a href="../" class="btn btn-ghost">
+              ✕ Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    // Verificar autenticación
+    if (!estaAutenticado()) {
+      window.location.href = '../login.html';
+      throw new Error('No autenticado');
+    }
+
+    // Mostrar información del usuario
+    function mostrarUsuarioActual() {
+      const usuario = obtenerUsuarioActual();
+      if (usuario) {
+        document.getElementById('userName').textContent = usuario.nombre;
+        document.getElementById('userRole').textContent = usuario.rol;
+        document.getElementById('userAvatar').textContent = usuario.nombre.charAt(0).toUpperCase();
+      }
+    }
+
+    function cerrarSesionUI() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        cerrarSesion();
+        window.location.href = '../login.html';
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday:'long', year:'numeric', month:'long', day:'numeric'
+    });
+
+    function guardarFormulario() {
+      const datos = {
+        pacienteNombre: document.getElementById('pacienteNombre').value,
+        pacienteDoc: document.getElementById('pacienteDoc').value,
+        motivo: document.getElementById('motivo').value,
+        medico: document.getElementById('medico').value,
+        diagnostico: document.getElementById('diagnostico').value,
+        tratamiento: document.getElementById('tratamiento').value
+      };
+      guardarHistoria(datos);
+    }
+
+    mostrarUsuarioActual();
+  </script>
+</body>
+</html>

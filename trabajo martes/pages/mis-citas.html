@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Citas - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="nueva.html" class="nav-link">＋ Nueva Historia</a>
+        <a href="mis-citas.html" class="nav-link active">📅 Mis Citas</a>
+        <a href="mis-pacientes.html" class="nav-link">👥 Mis Pacientes</a>
+        <a href="mi-perfil.html" class="nav-link">👤 Mi Perfil</a>
+        <a href="reportes.html" class="nav-link">📊 Reportes</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">D</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Doctor</div>
+            <div class="user-name" id="userName">doctor</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Mis Citas Programadas</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>📅 Citas Asignadas</h1>
+          <p>Gestiona tus citas y registra atención</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="citasHoyCount">0</div>
+            <div class="stat-label">Hoy</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="citasProximasCount">0</div>
+            <div class="stat-label">Próximas 7 días</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="citasCompletadasCount">0</div>
+            <div class="stat-label">Completadas</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Citas de Hoy</h3>
+          <div id="citasHoy" class="citas-list">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Próximas Citas</h3>
+          <table id="tablaCitasProximas" class="table">
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Fecha y Hora</th>
+                <th>Motivo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCitasProximas">
+              <!-- Se llena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Modal Registrar Atención -->
+        <div id="modalRegistrar" class="modal-overlay" onclick="cerrarModalRegistrar()">
+          <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Registrar Atención</h3>
+              <button class="close-btn" onclick="cerrarModalRegistrar()">✕</button>
+            </div>
+            <form id="formRegistrar" class="form-grid">
+              <input type="hidden" id="citaIdRegistrar">
+              <textarea id="diagnostico" placeholder="Diagnóstico" style="grid-column: 1/-1; min-height: 80px;"></textarea>
+              <textarea id="tratamiento" placeholder="Tratamiento" style="grid-column: 1/-1; min-height: 80px;"></textarea>
+              <div style="grid-column: 1/-1;">
+                <button type="button" class="btn btn-success" onclick="guardarRegistroAtencion()">✓ Completar Cita</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    if (!esDoctor()) {
+      alert('⛔ Esta sección es solo para doctores.');
+      window.location.href = '../';
+    }
+
+    const usuarioActual = obtenerUsuarioActual();
+    const doctorId = usuarioActual.id;
+
+    function cargarMisCitas() {
+      const citasHoy = getCitasPorDoctorHoy(doctorId);
+      const citasProximas = getCitasPorDoctorProximas(doctorId, 30);
+      const citasCompletadas = getCitasPorDoctor(doctorId).filter(c => c.estado === 'completada').length;
+
+      // Actualizar contadores
+      document.getElementById('citasHoyCount').textContent = citasHoy.length;
+      document.getElementById('citasProximasCount').textContent = citasProximas.length;
+      document.getElementById('citasCompletadasCount').textContent = citasCompletadas;
+
+      // Citas de hoy
+      const divHoy = document.getElementById('citasHoy');
+      if (citasHoy.length === 0) {
+        divHoy.innerHTML = '<p class="empty-state">Sin citas programadas para hoy</p>';
+      } else {
+        divHoy.innerHTML = citasHoy.map(c => `
+          <div class="cita-card">
+            <div class="cita-header">
+              <strong>${c.pacienteNombre}</strong>
+              <span class="hora">${new Date(c.fecha + 'T' + c.hora).toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <p>${c.motivo}</p>
+            <button class="btn btn-small" onclick="abrirRegistro('${c.id}')">Registrar Atención</button>
+          </div>
+        `).join('');
+      }
+
+      // Tabla próximas
+      const tbody = document.getElementById('tbodyCitasProximas');
+      if (citasProximas.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Sin citas próximas</td></tr>';
+      } else {
+        tbody.innerHTML = citasProximas.map(c => `
+          <tr>
+            <td><strong>${c.pacienteNombre}</strong></td>
+            <td>${formatearFechaHora(c.fecha + 'T' + c.hora)}</td>
+            <td>${c.motivo}</td>
+            <td><span class="status-badge status-${c.estado}">${c.estado}</span></td>
+            <td>
+              <button class="btn-icon" onclick="abrirRegistro('${c.id}')">✓</button>
+              <button class="btn-icon danger" onclick="cancelarCitaUI('${c.id}')">✕</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function abrirRegistro(citaId) {
+      document.getElementById('citaIdRegistrar').value = citaId;
+      document.getElementById('diagnostico').value = '';
+      document.getElementById('tratamiento').value = '';
+      document.getElementById('modalRegistrar').style.display = 'flex';
+    }
+
+    function cerrarModalRegistrar() {
+      document.getElementById('modalRegistrar').style.display = 'none';
+    }
+
+    function guardarRegistroAtencion() {
+      const citaId = document.getElementById('citaIdRegistrar').value;
+      const diagnostico = document.getElementById('diagnostico').value;
+      const tratamiento = document.getElementById('tratamiento').value;
+
+      if (!diagnostico || !tratamiento) {
+        alert('⚠️ Completa diagnóstico y tratamiento');
+        return;
+      }
+
+      completarCita(citaId, diagnostico, tratamiento);
+      mostrarAlerta('✅ Cita completada', 'success');
+      cerrarModalRegistrar();
+      cargarMisCitas();
+    }
+
+    function cancelarCitaUI(citaId) {
+      if (confirm('¿Cancelar esta cita?')) {
+        cancelarCita(citaId);
+        mostrarAlerta('✅ Cita cancelada', 'success');
+        cargarMisCitas();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) window.location.href = '../login.html';
+      actualizarInfoUsuario();
+      actualizarFecha();
+      cargarMisCitas();
+    });
+  </script>
+</body>
+</html>

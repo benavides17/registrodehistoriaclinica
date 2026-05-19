@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Buscar — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="../" class="nav-item">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="nueva.html" class="nav-item">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>
+      <a href="buscar.html" class="nav-item active">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-role" id="userRole">Rol</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesionUI()" style="width: 100%; margin-top: 10px; padding: 8px; background: #f4f1ec; border: 1px solid #d9cfc4; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Buscar Registros</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Búsqueda Avanzada</h1>
+        <p>Busca historias clínicas y pacientes</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Opciones de Búsqueda</div>
+        
+        <div class="search-bar">
+          <input type="text" id="terminoBusqueda" placeholder="Busca por nombre, documento, motivo..." onkeyup="buscarGlobal()"/>
+        </div>
+
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label>Tipo de Búsqueda</label>
+            <select id="tipoBusqueda" onchange="buscarGlobal()">
+              <option value="all">Todos</option>
+              <option value="historias">Solo Historias</option>
+              <option value="pacientes">Solo Pacientes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ordenar Por</label>
+            <select id="ordenar">
+              <option value="fecha">Más Reciente</option>
+              <option value="nombre">Nombre A-Z</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" style="width: 100%" onclick="buscarGlobal()">🔍 Buscar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Resultados</div>
+        <div id="resultadosBusqueda">
+          <p style="text-align: center; color: #999;">Ingresa un término para buscar</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    // Verificar autenticación
+    if (!estaAutenticado()) {
+      window.location.href = '../login.html';
+      throw new Error('No autenticado');
+    }
+
+    // Mostrar información del usuario
+    function mostrarUsuarioActual() {
+      const usuario = obtenerUsuarioActual();
+      if (usuario) {
+        document.getElementById('userName').textContent = usuario.nombre;
+        document.getElementById('userRole').textContent = usuario.rol;
+        document.getElementById('userAvatar').textContent = usuario.nombre.charAt(0).toUpperCase();
+      }
+    }
+
+    function cerrarSesionUI() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        cerrarSesion();
+        window.location.href = '../login.html';
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday:'long', year:'numeric', month:'long', day:'numeric'
+    });
+
+    function buscarGlobal() {
+      const termino = document.getElementById('terminoBusqueda').value;
+      const tipo = document.getElementById('tipoBusqueda').value;
+      
+      if (!termino.trim()) {
+        document.getElementById('resultadosBusqueda').innerHTML = '<p style="text-align: center; color: #999;">Ingresa un término para buscar</p>';
+        return;
+      }
+
+      if (tipo === 'historias' || tipo === 'all') {
+        buscarHistoriasUI(termino);
+      }
+      if (tipo === 'pacientes' || tipo === 'all') {
+        buscarPacientesUI(termino);
+      }
+    }
+
+    mostrarUsuarioActual();
+  </script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Citas — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="../" class="nav-item">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="nueva.html" class="nav-item">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>
+      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item active">
+        <span class="nav-icon">📅</span> Citas
+      </a>
+      <a href="buscar.html" class="nav-item">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-role" id="userRole">Rol</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesionUI()" style="width: 100%; margin-top: 10px; padding: 8px; background: #f4f1ec; border: 1px solid #d9cfc4; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Gestión de Citas</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <div style="margin-bottom: 30px;">
+        <h1>📅 Citas y Turnos</h1>
+        <p style="color: #8a8680;">Agenda y gestiona citas médicas</p>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button class="action-btn primary" onclick="abrirFormularioCita()">
+          <span>＋</span> Nueva Cita
+        </button>
+        <button class="action-btn secondary" onclick="agregarCitasDePrueba()">
+          <span>📋</span> Agregar Pruebas
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 13px; color: #8a8680; font-weight: 500;">Citas Hoy</div>
+          <div style="font-size: 32px; font-weight: 600; color: #1a5c8a; margin-top: 8px;" id="countHoy">0</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 13px; color: #8a8680; font-weight: 500;">Próximas 7 días</div>
+          <div style="font-size: 32px; font-weight: 600; color: #2d7a4f; margin-top: 8px;" id="countProximas">0</div>
+        </div>
+      </div>
+
+      <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;">
+        <h3 style="margin-top: 0;">Citas Próximas</h3>
+        <div id="listaCitas" style="display: grid; gap: 12px;">
+          <p style="color: #8a8680; text-align: center;">Cargando citas...</p>
+        </div>
+      </div>
+
+      <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <h3 style="margin-top: 0;">Todas las Citas</h3>
+        <div style="overflow-x: auto;">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Doctor</th>
+                <th>Fecha y Hora</th>
+                <th>Motivo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCitas">
+              <tr class="empty-row">
+                <td colspan="6">No hay citas registradas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL FORMULARIO -->
+  <div id="modalFormularioCita" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="cerrarFormularioCita()"></div>
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Nueva Cita</h2>
+        <button class="modal-close" onclick="cerrarFormularioCita()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formCita" onsubmit="guardarFormularioCita(event)">
+          <input type="hidden" id="idCita" />
+
+          <div class="form-group">
+            <label>Paciente *</label>
+            <select id="pacienteIdCita" required>
+              <option value="">-- Selecciona un paciente --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Doctor *</label>
+            <select id="doctorIdCita" required>
+              <option value="">-- Selecciona un doctor --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Fecha *</label>
+            <input type="date" id="fechaCita" required />
+          </div>
+
+          <div class="form-group">
+            <label>Hora *</label>
+            <input type="time" id="horaCita" required />
+          </div>
+
+          <div class="form-group">
+            <label>Motivo de la Consulta *</label>
+            <input type="text" id="motivoCita" placeholder="Ej. Revisión general" required />
+          </div>
+
+          <div class="form-group">
+            <label>Notas</label>
+            <textarea id="notasCita" placeholder="Notas adicionales..." style="width: 100%; padding: 8px; border: 2px solid #e8e3db; border-radius: 6px; font-family: 'DM Sans', sans-serif; resize: vertical; min-height: 80px;"></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            <button type="button" class="btn btn-ghost" onclick="cerrarFormularioCita()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script>
+    // Verificar autenticación
+    if (!estaAutenticado()) {
+      window.location.href = '../login.html';
+      throw new Error('No autenticado');
+    }
+
+    // Mostrar información del usuario
+    function mostrarUsuarioActual() {
+      const usuario = obtenerUsuarioActual();
+      if (usuario) {
+        document.getElementById('userName').textContent = usuario.nombre;
+        document.getElementById('userRole').textContent = usuario.rol;
+        document.getElementById('userAvatar').textContent = usuario.nombre.charAt(0).toUpperCase();
+      }
+    }
+
+    function cerrarSesionUI() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        cerrarSesion();
+        window.location.href = '../login.html';
+      }
+    }
+
+    function cargarCitas() {
+      const citas = getCitas().sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      const tbodyCitas = document.getElementById('tbodyCitas');
+      const listaCitas = document.getElementById('listaCitas');
+
+      // Tabla
+      if (citas.length === 0) {
+        tbodyCitas.innerHTML = '<tr class="empty-row"><td colspan="6">No hay citas registradas</td></tr>';
+        listaCitas.innerHTML = '<p style="text-align: center; color: #8a8680;">No hay citas próximas</p>';
+      } else {
+        tbodyCitas.innerHTML = citas.map(cita => `
+          <tr>
+            <td><strong>${cita.pacienteNombre}</strong></td>
+            <td>${cita.doctorNombre}</td>
+            <td>${formatearFechaHora(cita.fecha)}</td>
+            <td>${cita.motivo}</td>
+            <td><span style="background: ${getColorEstado(cita.estado)}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${cita.estado}</span></td>
+            <td>
+              <button class="btn btn-secondary" style="font-size: 12px;" onclick="editarCita('${cita.id}')">✏️</button>
+              <button class="btn btn-danger" style="font-size: 12px;" onclick="eliminarCitaUI('${cita.id}')">🗑️</button>
+            </td>
+          </tr>
+        `).join('');
+
+        const citasProximas = getCitasProximas(7);
+        listaCitas.innerHTML = citasProximas.length === 0 
+          ? '<p style="text-align: center; color: #8a8680;">No hay citas próximas</p>'
+          : citasProximas.map(cita => `
+            <div style="background: #f9f8f7; border-left: 4px solid #1a5c8a; padding: 12px; border-radius: 6px;">
+              <div style="font-weight: 600; color: #1c1a17;">${cita.pacienteNombre} con ${cita.doctorNombre}</div>
+              <div style="font-size: 13px; color: #8a8680; margin-top: 4px;">📅 ${formatearFechaHora(cita.fecha)}</div>
+              <div style="font-size: 13px; color: #8a8680;">📋 ${cita.motivo}</div>
+            </div>
+          `).join('');
+      }
+
+      // Contadores
+      document.getElementById('countHoy').textContent = getCitasHoy().length;
+      document.getElementById('countProximas').textContent = getCitasProximas(7).length;
+    }
+
+    function cargarSelects() {
+      // Pacientes
+      const pacientes = getPacientes();
+      const selectPaciente = document.getElementById('pacienteIdCita');
+      selectPaciente.innerHTML = '<option value="">-- Selecciona un paciente --</option>' +
+        pacientes.map(p => `<option value="${p.id}">${p.nombre} (${p.documento})</option>`).join('');
+
+      // Doctores
+      const doctores = getDoctoresActivos();
+      const selectDoctor = document.getElementById('doctorIdCita');
+      selectDoctor.innerHTML = '<option value="">-- Selecciona un doctor --</option>' +
+        doctores.map(d => `<option value="${d.id}">${d.nombre} (${d.especialidad})</option>`).join('');
+    }
+
+    function abrirFormularioCita() {
+      document.getElementById('idCita').value = '';
+      document.getElementById('formCita').reset();
+      cargarSelects();
+      document.getElementById('modalFormularioCita').style.display = 'flex';
+    }
+
+    function editarCita(id) {
+      const cita = getCitaById(id);
+      if (!cita) return;
+
+      document.getElementById('idCita').value = cita.id;
+      document.getElementById('pacienteIdCita').value = cita.pacienteId;
+      document.getElementById('doctorIdCita').value = cita.doctorId;
+      document.getElementById('fechaCita').value = cita.fecha.split('T')[0];
+      document.getElementById('horaCita').value = cita.fecha.split('T')[1].slice(0, 5);
+      document.getElementById('motivoCita').value = cita.motivo;
+      document.getElementById('notasCita').value = cita.notas || '';
+      cargarSelects();
+      document.getElementById('modalFormularioCita').style.display = 'flex';
+    }
+
+    function cerrarFormularioCita() {
+      document.getElementById('modalFormularioCita').style.display = 'none';
+      document.getElementById('formCita').reset();
+    }
+
+    function guardarFormularioCita(event) {
+      event.preventDefault();
+
+      const idCita = document.getElementById('idCita').value;
+      const pacienteId = document.getElementById('pacienteIdCita').value;
+      const doctorId = document.getElementById('doctorIdCita').value;
+      const fecha = document.getElementById('fechaCita').value;
+      const hora = document.getElementById('horaCita').value;
+      const motivo = document.getElementById('motivoCita').value.trim();
+      const notas = document.getElementById('notasCita').value.trim();
+
+      const paciente = pacienteId ? getPacienteById(pacienteId) : null;
+      const doctor = doctorId ? getDoctorById(doctorId) : null;
+
+      if (!paciente || !doctor || !fecha || !hora || !motivo) {
+        alert('⚠️ Completa todos los campos requeridos');
+        return;
+      }
+
+      const fechaCompleta = fecha + 'T' + hora + ':00';
+
+      const datos = {
+        pacienteId: pacienteId,
+        pacienteNombre: paciente.nombre,
+        doctorId: doctorId,
+        doctorNombre: doctor.nombre,
+        fecha: fechaCompleta,
+        motivo: motivo,
+        notas: notas
+      };
+
+      if (idCita) {
+        actualizarCita(idCita, datos);
+        alert('✅ Cita actualizada');
+      } else {
+        crearCita(datos);
+        alert('✅ Cita creada');
+      }
+
+      cerrarFormularioCita();
+      cargarCitas();
+    }
+
+    function eliminarCitaUI(id) {
+      if (confirm('⚠️ ¿Eliminar esta cita?')) {
+        eliminarCita(id);
+        alert('✅ Cita eliminada');
+        cargarCitas();
+      }
+    }
+
+    function getColorEstado(estado) {
+      const colores = {
+        'programada': '#fff3cd',
+        'confirmada': '#d4edda',
+        'completada': '#cce5ff',
+        'cancelada': '#f8d7da'
+      };
+      return colores[estado] || '#e8e3db';
+    }
+
+    function formatearFechaHora(fecha) {
+      return new Date(fecha).toLocaleString('es-CO');
+    }
+
+    function agregarCitasDePrueba() {
+      if (getPacientes().length === 0) {
+        alert('⚠️ Primero agrega pacientes');
+        return;
+      }
+      if (getDoctores().length === 0) {
+        alert('⚠️ Primero agrega doctores');
+        return;
+      }
+
+      if (getCitas().length === 0) {
+        const pacientes = getPacientes();
+        const doctores = getDoctores();
+        const mañana = new Date();
+        mañana.setDate(mañana.getDate() + 1);
+
+        crearCita({
+          pacienteId: pacientes[0].id,
+          pacienteNombre: pacientes[0].nombre,
+          doctorId: doctores[0].id,
+          doctorNombre: doctores[0].nombre,
+          fecha: mañana.toISOString().slice(0, 16),
+          motivo: 'Revisión general',
+          notas: 'Cita de prueba'
+        });
+
+        alert('✅ Cita de prueba agregada');
+        cargarCitas();
+      } else {
+        alert('ℹ️ Ya hay citas en el sistema');
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Inicializar
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    mostrarUsuarioActual();
+    cargarSelects();
+    cargarCitas();
+  </script>
+</body>
+</html>

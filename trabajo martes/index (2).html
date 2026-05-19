@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Historias Clínicas — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="pages/nueva.html" class="nav-item">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pages/pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>
+      <a href="pages/buscar.html" class="nav-item">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">Dr</div>
+        <div>
+          <div class="user-name">Dr. Usuario</div>
+          <div class="user-role">Médico</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Dashboard</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent:#1a5c8a">
+          <div class="stat-label">Total Pacientes</div>
+          <div class="stat-number" id="totalPacientes">0</div>
+          <div class="stat-sub">registrados</div>
+        </div>
+        <div class="stat-card" style="--accent:#2d7a4f">
+          <div class="stat-label">Historias Hoy</div>
+          <div class="stat-number" id="historiasHoy">0</div>
+          <div class="stat-sub">creadas hoy</div>
+        </div>
+        <div class="stat-card" style="--accent:#7a4f2d">
+          <div class="stat-label">Este Mes</div>
+          <div class="stat-number" id="historiasmes">0</div>
+          <div class="stat-sub">historias</div>
+        </div>
+        <div class="stat-card" style="--accent:#4f2d7a">
+          <div class="stat-label">Total Historias</div>
+          <div class="stat-number" id="totalHistorias">0</div>
+          <div class="stat-sub">en sistema</div>
+        </div>
+      </div>
+
+      <!-- ACCIONES RAPIDAS -->
+      <div class="section-title">Acciones Rápidas</div>
+      <div class="actions-row">
+        <a href="pages/nueva.html" class="action-btn primary">
+          <span>＋</span> Nueva Historia Clínica
+        </a>
+        <a href="pages/pacientes.html" class="action-btn secondary">
+          <span>◉</span> Ver Pacientes
+        </a>
+        <a href="pages/buscar.html" class="action-btn secondary">
+          <span>◎</span> Buscar Registro
+        </a>
+        <button class="action-btn danger" onclick="exportarDatos()">
+          <span>⬇</span> Exportar JSON
+        </button>
+      </div>
+
+      <!-- ULTIMAS HISTORIAS -->
+      <div class="section-title">Últimas Historias Clínicas</div>
+      <div class="table-wrap">
+        <table class="tabla" id="tablaRecientes">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Fecha</th>
+              <th>Motivo</th>
+              <th>Médico</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRecientes">
+            <tr class="empty-row">
+              <td colspan="5">No hay historias registradas aún. <a href="pages/nueva.html">Crear primera</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday:'long', year:'numeric', month:'long', day:'numeric'
+    });
+    cargarDashboard();
+  </script>
+</body>
+</html>

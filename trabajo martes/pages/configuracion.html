@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="doctores.html" class="nav-link">👨‍⚕️ Doctores</a>
+        <a href="usuarios.html" class="nav-link">👥 Usuarios</a>
+        <a href="reportes.html" class="nav-link">📊 Reportes</a>
+        <a href="configuracion.html" class="nav-link active">⚙️ Configuración</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Administrador</div>
+            <div class="user-name" id="userName">admin</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Configuración del Sistema</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>⚙️ Configuración General</h1>
+          <p>Administra los parámetros del sistema</p>
+        </div>
+
+        <div class="config-container">
+          <!-- Información de la Clínica -->
+          <div class="config-section">
+            <h2>📋 Información de la Clínica</h2>
+            <div class="form-grid">
+              <input type="text" id="nombreClinica" placeholder="Nombre de la clínica" required>
+              <input type="email" id="emailClinica" placeholder="Email principal" required>
+              <input type="tel" id="telefonoClinica" placeholder="Teléfono" required>
+              <input type="text" id="direccionClinica" placeholder="Dirección" required>
+              <textarea id="horariosAtencion" placeholder="Horarios de atención" style="grid-column: 1/-1; min-height: 60px;"></textarea>
+              <button class="btn btn-primary" style="grid-column: 1/-1;" onclick="guardarConfiguracionClinica()">💾 Guardar Información</button>
+            </div>
+          </div>
+
+          <!-- Configuración de Citas -->
+          <div class="config-section">
+            <h2>📅 Configuración de Citas</h2>
+            <div class="form-grid">
+              <label>Duración de cada cita (minutos)</label>
+              <input type="number" id="duracionCita" min="15" max="120" step="15" placeholder="30">
+              <label>Días de atención a la semana</label>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                <label><input type="checkbox" name="dia-config" value="lunes" checked> Lunes</label>
+                <label><input type="checkbox" name="dia-config" value="martes" checked> Martes</label>
+                <label><input type="checkbox" name="dia-config" value="miércoles" checked> Miércoles</label>
+                <label><input type="checkbox" name="dia-config" value="jueves" checked> Jueves</label>
+                <label><input type="checkbox" name="dia-config" value="viernes" checked> Viernes</label>
+                <label><input type="checkbox" name="dia-config" value="sábado"> Sábado</label>
+              </div>
+              <button class="btn btn-primary" style="grid-column: 1/-1;" onclick="guardarConfiguracionCitas()">💾 Guardar Configuración de Citas</button>
+            </div>
+          </div>
+
+          <!-- Gestión de Datos -->
+          <div class="config-section">
+            <h2>🗄️ Gestión de Datos</h2>
+            <div class="form-grid">
+              <button class="btn btn-secondary" style="grid-column: 1/-1;" onclick="exportarTodoJSON()">⬇ Exportar Toda la Base de Datos</button>
+              <button class="btn btn-secondary" style="grid-column: 1/-1;" onclick="exportarTodoCSV()">📊 Exportar a CSV</button>
+              <button class="btn btn-warning" style="grid-column: 1/-1;" onclick="respaldarBaseDatos()">💾 Crear Respaldo</button>
+            </div>
+          </div>
+
+          <!-- Peligro - Limpieza de Datos -->
+          <div class="config-section danger-zone">
+            <h2>⚠️ Zona de Peligro</h2>
+            <p>Estas acciones no se pueden deshacer. Úsalas con cuidado.</p>
+            <div class="form-grid">
+              <button class="btn btn-danger" style="grid-column: 1/-1;" onclick="limpiarHistorias()">🗑️ Eliminar Todas las Historias</button>
+              <button class="btn btn-danger" style="grid-column: 1/-1;" onclick="limpiarPacientes()">🗑️ Eliminar Todos los Pacientes</button>
+              <button class="btn btn-danger" style="grid-column: 1/-1;" onclick="limpiarTodoSistema()">🚨 Limpiar TODA la Base de Datos</button>
+            </div>
+          </div>
+
+          <!-- Estado del Sistema -->
+          <div class="config-section">
+            <h2>📊 Estado del Sistema</h2>
+            <div id="estadoSistema" class="estado-grid">
+              <!-- Se llena dinámicamente -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    if (!esAdmin()) {
+      alert('⛔ Acceso denegado. Solo administradores.');
+      window.location.href = '../';
+    }
+
+    function cargarConfiguracion() {
+      const config = obtenerConfiguracion();
+
+      document.getElementById('nombreClinica').value = config.nombreClinica || '';
+      document.getElementById('emailClinica').value = config.email || '';
+      document.getElementById('telefonoClinica').value = config.telefono || '';
+      document.getElementById('direccionClinica').value = config.direccion || '';
+      document.getElementById('horariosAtencion').value = config.horariosAtencion || '';
+      document.getElementById('duracionCita').value = config.duracionCitaMinutos || 30;
+
+      cargarEstadoSistema();
+    }
+
+    function guardarConfiguracionClinica() {
+      const config = {
+        nombreClinica: document.getElementById('nombreClinica').value,
+        email: document.getElementById('emailClinica').value,
+        telefono: document.getElementById('telefonoClinica').value,
+        direccion: document.getElementById('direccionClinica').value,
+        horariosAtencion: document.getElementById('horariosAtencion').value
+      };
+
+      actualizarConfiguracion(config);
+      mostrarAlerta('✅ Configuración guardada', 'success');
+    }
+
+    function guardarConfiguracionCitas() {
+      const duracion = parseInt(document.getElementById('duracionCita').value) || 30;
+      const diasChecked = Array.from(document.querySelectorAll('input[name="dia-config"]:checked')).map(el => el.value);
+
+      const config = {
+        duracionCitaMinutos: duracion,
+        diasLaborales: diasChecked
+      };
+
+      actualizarConfiguracion(config);
+      mostrarAlerta('✅ Configuración de citas guardada', 'success');
+    }
+
+    function exportarTodoJSON() {
+      const datos = {
+        historias: getHistorias(),
+        pacientes: getPacientes(),
+        doctores: getDoctores(),
+        usuarios: getUsuarios(),
+        citas: getCitas(),
+        configuracion: obtenerConfiguracion(),
+        fecha_exportacion: new Date().toLocaleString('es-CO')
+      };
+
+      const json = JSON.stringify(datos, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-pompeya-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      mostrarAlerta('✅ Respaldo creado', 'success');
+    }
+
+    function exportarTodoCSV() {
+      let csv = 'HISTORIAS CLÍNICAS\n';
+      csv += 'ID,Paciente,Documento,Motivo,Médico,Fecha\n';
+      getHistorias().forEach(h => {
+        csv += `"${h.id}","${h.pacienteNombre}","${h.pacienteDoc}","${h.motivo}","${h.medico}","${h.fechaCreacion}"\n`;
+      });
+
+      csv += '\n\nPACIENTES\n';
+      csv += 'ID,Nombre,Documento,Teléfono,Email\n';
+      getPacientes().forEach(p => {
+        csv += `"${p.id}","${p.nombre}","${p.documento}","${p.telefono}","${p.email}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `datos-pompeya-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      mostrarAlerta('✅ Datos exportados a CSV', 'success');
+    }
+
+    function respaldarBaseDatos() {
+      exportarTodoJSON();
+    }
+
+    function limpiarHistorias() {
+      if (confirm('⚠️ ¿Estás seguro? Esto eliminará TODAS las historias clínicas.')) {
+        vaciarHistorias();
+        mostrarAlerta('✅ Historias eliminadas', 'success');
+        cargarEstadoSistema();
+      }
+    }
+
+    function limpiarPacientes() {
+      if (confirm('⚠️ ¿Estás seguro? Esto eliminará TODOS los pacientes.')) {
+        vaciarPacientes();
+        mostrarAlerta('✅ Pacientes eliminados', 'success');
+        cargarEstadoSistema();
+      }
+    }
+
+    function limpiarTodoSistema() {
+      if (confirm('🚨 ¿ESTÁS MUY SEGURO? Esto eliminará TODO: historias, pacientes, citas, doctores, usuarios, configuración.')) {
+        if (confirm('ÚLTIMA ADVERTENCIA: Esta acción NO se puede deshacer.')) {
+          limpiarBaseDatos();
+          localStorage.removeItem('pompeya_doctores');
+          localStorage.removeItem('pompeya_usuarios');
+          localStorage.removeItem('pompeya_citas');
+          localStorage.removeItem('pompeya_configuracion');
+          localStorage.removeItem('pompeya_asistencia');
+          mostrarAlerta('✅ Base de datos limpiada completamente', 'success');
+          window.location.href = '../login.html';
+        }
+      }
+    }
+
+    function cargarEstadoSistema() {
+      const estado = obtenerEstadoBD();
+      const html = `
+        <div class="estado-item">
+          <label>Historias Clínicas:</label>
+          <span>${estado.historias || 0}</span>
+        </div>
+        <div class="estado-item">
+          <label>Pacientes:</label>
+          <span>${estado.pacientes || 0}</span>
+        </div>
+        <div class="estado-item">
+          <label>Doctores:</label>
+          <span>${estado.doctores || 0}</span>
+        </div>
+        <div class="estado-item">
+          <label>Usuarios:</label>
+          <span>${estado.usuarios || 0}</span>
+        </div>
+        <div class="estado-item">
+          <label>Citas:</label>
+          <span>${estado.citas || 0}</span>
+        </div>
+        <div class="estado-item">
+          <label>Espacio usado (aprox):</label>
+          <span>${(JSON.stringify(localStorage).length / 1024).toFixed(2)} KB</span>
+        </div>
+      `;
+      document.getElementById('estadoSistema').innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) window.location.href = '../login.html';
+      actualizarInfoUsuario();
+      actualizarFecha();
+      cargarConfiguracion();
+    });
+  </script>
+  <style>
+    .config-container { display: flex; flex-direction: column; gap: 30px; }
+    .config-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .config-section h2 { margin-bottom: 15px; color: #1a5c8a; }
+    .danger-zone { border-left: 4px solid #8a2020; background: #fef5f5; }
+    .danger-zone h2 { color: #8a2020; }
+    .estado-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .estado-item { padding: 10px; background: #f4f1ec; border-radius: 5px; }
+    .estado-item label { font-weight: 600; color: #1c1a17; }
+    .estado-item span { display: block; font-size: 18px; color: #1a5c8a; font-weight: bold; }
+  </style>
+</body>
+</html>

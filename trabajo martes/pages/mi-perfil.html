@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="nueva.html" class="nav-link">＋ Nueva Historia</a>
+        <a href="mis-citas.html" class="nav-link">📅 Mis Citas</a>
+        <a href="mis-pacientes.html" class="nav-link">👥 Mis Pacientes</a>
+        <a href="mi-perfil.html" class="nav-link active">👤 Mi Perfil</a>
+        <a href="reportes.html" class="nav-link">📊 Reportes</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">D</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Doctor</div>
+            <div class="user-name" id="userName">doctor</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Mi Perfil</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>👤 Mi Perfil y Horario</h1>
+          <p>Información personal y disponibilidad</p>
+        </div>
+
+        <div class="profile-container">
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="avatar-large" id="avatarGrande">D</div>
+              <div class="profile-info">
+                <h2 id="nombrePerfil">—</h2>
+                <p id="especialidadPerfil">—</p>
+                <p id="cedulaPerfil">—</p>
+              </div>
+            </div>
+
+            <div class="profile-section">
+              <h3>Información de Contacto</h3>
+              <div class="info-grid">
+                <div>
+                  <label>📧 Email</label>
+                  <p id="emailPerfil">—</p>
+                </div>
+                <div>
+                  <label>📱 Teléfono</label>
+                  <p id="telefonoPerfil">—</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-section">
+              <h3>Horario de Atención</h3>
+              <p id="horarioPerfil">—</p>
+              <button class="btn btn-primary" onclick="abrirEditarHorario()">✏️ Editar Horario</button>
+            </div>
+
+            <div class="profile-section">
+              <h3>Estadísticas</h3>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-number" id="totalPacientesStats">0</div>
+                  <div class="stat-label">Pacientes</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number" id="totalCitasStats">0</div>
+                  <div class="stat-label">Citas</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number" id="citasCompletadasStats">0</div>
+                  <div class="stat-label">Completadas</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-section">
+              <h3>Cambiar Contraseña</h3>
+              <div class="form-grid">
+                <input type="password" id="passwordAntigua" placeholder="Contraseña actual" required>
+                <input type="password" id="passwordNueva" placeholder="Nueva contraseña" required>
+                <input type="password" id="passwordConfirmar" placeholder="Confirmar contraseña" required>
+                <div style="grid-column: 1/-1;">
+                  <button type="button" class="btn btn-success" onclick="cambiarContraseña()">🔐 Cambiar Contraseña</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Editar Horario -->
+        <div id="modalHorario" class="modal-overlay" onclick="cerrarModalHorario()">
+          <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Editar Horario</h3>
+              <button class="close-btn" onclick="cerrarModalHorario()">✕</button>
+            </div>
+            <form id="formHorario" class="form-grid">
+              <label>Lunes a Viernes</label>
+              <input type="time" id="horaInicio" required>
+              <input type="time" id="horaFin" required>
+              <label style="grid-column: 1/-1; margin-top: 15px;">Días de atención</label>
+              <div style="grid-column: 1/-1; display: flex; gap: 10px; flex-wrap: wrap;">
+                <label><input type="checkbox" name="dia" value="lunes" checked> Lunes</label>
+                <label><input type="checkbox" name="dia" value="martes" checked> Martes</label>
+                <label><input type="checkbox" name="dia" value="miércoles" checked> Miércoles</label>
+                <label><input type="checkbox" name="dia" value="jueves" checked> Jueves</label>
+                <label><input type="checkbox" name="dia" value="viernes" checked> Viernes</label>
+                <label><input type="checkbox" name="dia" value="sábado"> Sábado</label>
+              </div>
+              <div style="grid-column: 1/-1;">
+                <button type="button" class="btn btn-success" onclick="guardarHorario()">💾 Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    if (!esDoctor()) {
+      alert('⛔ Esta sección es solo para doctores.');
+      window.location.href = '../';
+    }
+
+    const usuarioActual = obtenerUsuarioActual();
+    const doctorId = usuarioActual.id;
+
+    function cargarPerfil() {
+      const usuario = obtenerUsuarioActual();
+      const doctor = getDoctorByEmail(usuario.email);
+
+      if (doctor) {
+        document.getElementById('avatarGrande').textContent = doctor.nombre[0].toUpperCase();
+        document.getElementById('nombrePerfil').textContent = doctor.nombre;
+        document.getElementById('especialidadPerfil').textContent = doctor.especialidad;
+        document.getElementById('cedulaPerfil').textContent = 'Cédula: ' + doctor.cedula;
+        document.getElementById('emailPerfil').textContent = doctor.email;
+        document.getElementById('telefonoPerfil').textContent = doctor.telefono || '—';
+        document.getElementById('horarioPerfil').textContent = doctor.horario || 'Lun-Vie 8am-5pm';
+      }
+
+      // Cargar estadísticas
+      const pacientes = getPacientesPorDoctor(doctorId);
+      const citas = getCitasPorDoctor(doctorId);
+      const completadas = citas.filter(c => c.estado === 'completada').length;
+
+      document.getElementById('totalPacientesStats').textContent = pacientes.length;
+      document.getElementById('totalCitasStats').textContent = citas.length;
+      document.getElementById('citasCompletadasStats').textContent = completadas;
+    }
+
+    function abrirEditarHorario() {
+      const doctor = getDoctorByEmail(obtenerUsuarioActual().email);
+      if (doctor) {
+        const horario = doctor.horario || 'Lun-Vie 8am-5pm';
+        document.getElementById('modalHorario').style.display = 'flex';
+      }
+    }
+
+    function cerrarModalHorario() {
+      document.getElementById('modalHorario').style.display = 'none';
+    }
+
+    function guardarHorario() {
+      const horaInicio = document.getElementById('horaInicio').value;
+      const horaFin = document.getElementById('horaFin').value;
+      const diasChecked = Array.from(document.querySelectorAll('input[name="dia"]:checked')).map(el => el.value);
+
+      if (!horaInicio || !horaFin) {
+        alert('⚠️ Completa el horario');
+        return;
+      }
+
+      const doctor = getDoctorByEmail(obtenerUsuarioActual().email);
+      if (doctor) {
+        const doctores = getDoctores();
+        const index = doctores.findIndex(d => d.id === doctor.id);
+        if (index >= 0) {
+          doctores[index].horario = `${horaInicio.split(':')[0]}am-${horaFin.split(':')[0]}pm`;
+          localStorage.setItem('pompeya_doctores', JSON.stringify(doctores));
+          mostrarAlerta('✅ Horario actualizado', 'success');
+          cerrarModalHorario();
+          cargarPerfil();
+        }
+      }
+    }
+
+    function cambiarContraseña() {
+      const antigua = document.getElementById('passwordAntigua').value;
+      const nueva = document.getElementById('passwordNueva').value;
+      const confirmar = document.getElementById('passwordConfirmar').value;
+
+      const usuario = obtenerUsuarioActual();
+      if (antigua !== usuario.password) {
+        alert('⚠️ Contraseña actual incorrecta');
+        return;
+      }
+
+      if (nueva !== confirmar) {
+        alert('⚠️ Las contraseñas no coinciden');
+        return;
+      }
+
+      if (nueva.length < 6) {
+        alert('⚠️ La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+
+      const usuarios = getUsuarios();
+      const index = usuarios.findIndex(u => u.id === usuario.id);
+      if (index >= 0) {
+        usuarios[index].password = nueva;
+        localStorage.setItem('pompeya_usuarios', JSON.stringify(usuarios));
+        mostrarAlerta('✅ Contraseña actualizada', 'success');
+        document.getElementById('passwordAntigua').value = '';
+        document.getElementById('passwordNueva').value = '';
+        document.getElementById('passwordConfirmar').value = '';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) window.location.href = '../login.html';
+      actualizarInfoUsuario();
+      actualizarFecha();
+      cargarPerfil();
+    });
+  </script>
+</body>
+</html>

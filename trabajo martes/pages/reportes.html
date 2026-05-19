@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="navReportes">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="reportes.html" class="nav-link active">📊 Reportes</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Admin</div>
+            <div class="user-name" id="userName">admin</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Reportes y Análisis</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>📊 Reportes del Sistema</h1>
+          <p>Análisis y estadísticas</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" onclick="generarReporteCompleto()">📥 Descargar Reporte Completo</button>
+          <button class="btn btn-secondary" onclick="exportarReportePDF()">📄 Exportar PDF</button>
+        </div>
+
+        <!-- Reporte General (Solo Admin) -->
+        <div id="reporteAdmin" style="display: none;">
+          <div class="report-section">
+            <h2>Resumen General del Sistema</h2>
+            <div class="report-grid">
+              <div class="report-card">
+                <h4>Pacientes</h4>
+                <div class="report-stats">
+                  <p>Total: <strong id="reportePacientesTotal">0</strong></p>
+                  <p>Nuevos este mes: <strong id="reportePacientesNuevos">0</strong></p>
+                </div>
+              </div>
+              <div class="report-card">
+                <h4>Historias Clínicas</h4>
+                <div class="report-stats">
+                  <p>Total: <strong id="reporteHistoriasTotal">0</strong></p>
+                  <p>Este mes: <strong id="reporteHistoriasMes">0</strong></p>
+                  <p>Hoy: <strong id="reporteHistoriasHoy">0</strong></p>
+                </div>
+              </div>
+              <div class="report-card">
+                <h4>Citas</h4>
+                <div class="report-stats">
+                  <p>Total: <strong id="reporteCitasTotal">0</strong></p>
+                  <p>Confirmadas: <strong id="reporteCitasConfirmadas">0</strong></p>
+                  <p>Completadas: <strong id="reporteCitasCompletadas">0</strong></p>
+                </div>
+              </div>
+              <div class="report-card">
+                <h4>Doctores</h4>
+                <div class="report-stats">
+                  <p>Total: <strong id="reporteDoctoresTotal">0</strong></p>
+                  <p>Activos: <strong id="reporteDoctoresActivos">0</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+              <h3>Doctores Más Citados</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Doctor</th>
+                    <th>Especialidad</th>
+                    <th>Total Citas</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyMedicosCitados">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reporte Personal (Doctor) -->
+        <div id="reporteDoctor" style="display: none;">
+          <div class="report-section">
+            <h2>Mi Reporte Personal</h2>
+            <div class="report-grid">
+              <div class="report-card">
+                <h4>Mis Citas</h4>
+                <div class="report-stats">
+                  <p>Total: <strong id="reporteDoctorCitasTotal">0</strong></p>
+                  <p>Completadas: <strong id="reporteDoctorCitasCompletadas">0</strong></p>
+                  <p>Pendientes: <strong id="reporteDoctorCitasPendientes">0</strong></p>
+                </div>
+              </div>
+              <div class="report-card">
+                <h4>Pacientes</h4>
+                <div class="report-stats">
+                  <p>Atendidos: <strong id="reporteDoctorPacientes">0</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+              <h3>Motivos de Consulta Frecuentes</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Motivo</th>
+                    <th>Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyMotivos">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top: 30px;">
+              <h3>Próximas Citas (30 días)</h3>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Paciente</th>
+                    <th>Fecha</th>
+                    <th>Motivo</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyProximas">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let usuarioActual = null;
+
+    function cargarReportes() {
+      try {
+        usuarioActual = obtenerUsuarioActual();
+        if (!usuarioActual) {
+          window.location.href = '../login.html';
+          return;
+        }
+
+        const esAdmin = usuarioActual.rol === 'admin';
+        const esDoc = usuarioActual.rol === 'doctor';
+
+        if (esAdmin) {
+          document.getElementById('reporteAdmin').style.display = 'block';
+          cargarReporteAdmin();
+        } else if (esDoc) {
+          document.getElementById('reporteDoctor').style.display = 'block';
+          cargarReporteDoctor();
+        } else {
+          alert('⛔ Acceso denegado');
+          window.location.href = '../';
+        }
+      } catch (error) {
+        console.error('Error al cargar reportes:', error);
+        alert('Error cargando reportes. Por favor intenta de nuevo.');
+      }
+    }
+
+    function cargarReporteAdmin() {
+      try {
+        const reporte = reporteCompleto();
+
+        document.getElementById('reportePacientesTotal').textContent = reporte.pacientes.total;
+        document.getElementById('reportePacientesNuevos').textContent = reporte.pacientes.nuevos_mes;
+
+        document.getElementById('reporteHistoriasTotal').textContent = reporte.historias.total;
+        document.getElementById('reporteHistoriasMes').textContent = reporte.historias.mes;
+        document.getElementById('reporteHistoriasHoy').textContent = reporte.historias.hoy;
+
+        document.getElementById('reporteCitasTotal').textContent = reporte.citas.total;
+        document.getElementById('reporteCitasConfirmadas').textContent = reporte.citas.confirmadas;
+        document.getElementById('reporteCitasCompletadas').textContent = reporte.citas.completadas;
+
+        document.getElementById('reporteDoctoresTotal').textContent = reporte.doctores.total;
+        document.getElementById('reporteDoctoresActivos').textContent = reporte.doctores.activos;
+
+        const tbodyMedicos = document.getElementById('tbodyMedicosCitados');
+        if (reporte.doctores.mas_citados.length === 0) {
+          tbodyMedicos.innerHTML = '<tr><td colspan="3">Sin datos</td></tr>';
+        } else {
+          tbodyMedicos.innerHTML = reporte.doctores.mas_citados.map(med => `
+            <tr>
+              <td><strong>${med.nombre || med.medico}</strong></td>
+              <td>${med.especialidad || '—'}</td>
+              <td>${med.count || 0}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Error cargando reporte admin:', error);
+      }
+    }
+
+    function cargarReporteDoctor() {
+      try {
+        const doctorId = usuarioActual.id;
+        const reporte = reportePorDoctor(doctorId);
+
+        document.getElementById('reporteDoctorCitasTotal').textContent = reporte.total_citas;
+        document.getElementById('reporteDoctorCitasCompletadas').textContent = reporte.citas_completadas;
+        document.getElementById('reporteDoctorCitasPendientes').textContent = reporte.citas_pendientes;
+        document.getElementById('reporteDoctorPacientes').textContent = reporte.pacientes_atendidos;
+
+        const tbodyMotivos = document.getElementById('tbodyMotivos');
+        tbodyMotivos.innerHTML = reporte.motivos_frecuentes.map(m => `
+          <tr>
+            <td>${m.motivo}</td>
+            <td>${m.count}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="2">Sin datos</td></tr>';
+
+        const tbodyProximas = document.getElementById('tbodyProximas');
+        tbodyProximas.innerHTML = reporte.citas_proximas.map(c => `
+          <tr>
+            <td>${c.pacienteNombre}</td>
+            <td>${formatearFecha(c.fecha)}</td>
+            <td>${c.motivo}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="3">Sin citas próximas</td></tr>';
+      } catch (error) {
+        console.error('Error cargando reporte doctor:', error);
+      }
+    }
+
+    function generarReporteCompleto() {
+      try {
+        usuarioActual = obtenerUsuarioActual();
+        const esAdmin = usuarioActual.rol === 'admin';
+        const reporte = esAdmin ? reporteCompleto() : reportePorDoctor(usuarioActual.id);
+        const json = JSON.stringify(reporte, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        mostrarAlerta('✅ Reporte descargado correctamente', 'success');
+      } catch (error) {
+        console.error('Error generando reporte:', error);
+        mostrarAlerta('❌ Error al generar reporte', 'error');
+      }
+    }
+
+    function exportarReportePDF() {
+      mostrarAlerta('📄 Funcionalidad de PDF disponible (integración con library externa)', 'info');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) {
+        window.location.href = '../login.html';
+        return;
+      }
+      actualizarInfoUsuario();
+      actualizarFecha();
+      cargarReportes();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="nueva.html" class="nav-link">＋ Nueva Historia</a>
+        <a href="pacientes.html" class="nav-link">◉ Pacientes</a>
+        <a href="doctores.html" class="nav-link">👨‍⚕️ Doctores</a>
+        <a href="citas.html" class="nav-link">📅 Citas</a>
+        <a href="usuarios.html" class="nav-link active">👥 Usuarios</a>
+        <a href="reportes.html" class="nav-link">📊 Reportes</a>
+        <a href="configuracion.html" class="nav-link">⚙️ Configuración</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Administrador</div>
+            <div class="user-name" id="userName">admin</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Gestión de Usuarios</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>👥 Usuarios del Sistema</h1>
+          <p>Administra todos los usuarios y permisos</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" onclick="abrirFormularioUsuario()">＋ Nuevo Usuario</button>
+          <button class="btn btn-secondary" onclick="agregarUsuariosDePrueba()">📋 Agregar Pruebas</button>
+        </div>
+
+        <div class="usuarios-grid" id="usuariosGrid">
+          <!-- Se llena dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Modal Formulario Usuario -->
+      <div id="modalUsuario" class="modal-overlay" onclick="cerrarModalUsuario()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Crear/Editar Usuario</h3>
+            <button class="close-btn" onclick="cerrarModalUsuario()">✕</button>
+          </div>
+          <form id="formUsuario" class="form-grid">
+            <input type="hidden" id="idUsuario">
+            <input type="email" id="emailUsuario" placeholder="Email" required>
+            <input type="password" id="passwordUsuario" placeholder="Contraseña" required>
+            <input type="text" id="nombreUsuario" placeholder="Nombre completo" required>
+            <select id="rolUsuario" required>
+              <option value="">Seleccionar rol</option>
+              <option value="admin">Administrador</option>
+              <option value="doctor">Doctor</option>
+              <option value="usuario">Recepción</option>
+            </select>
+            <div style="grid-column: 1/-1;">
+              <button type="button" class="btn btn-primary" onclick="guardarFormularioUsuario()">💾 Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    if (!esAdmin()) {
+      alert('⛔ Acceso denegado. Solo administradores.');
+      window.location.href = '../';
+    }
+
+    function cargarUsuarios() {
+      const usuarios = getUsuarios();
+      const grid = document.getElementById('usuariosGrid');
+      
+      if (usuarios.length === 0) {
+        grid.innerHTML = '<p class="empty-state">No hay usuarios. <a href="#" onclick="agregarUsuariosDePrueba()">Crear pruebas</a></p>';
+        return;
+      }
+
+      grid.innerHTML = usuarios.map(u => `
+        <div class="user-card">
+          <div class="card-header">
+            <div class="avatar" style="background-color: ${['#3498db', '#e74c3c', '#2ecc71'][['admin','doctor','usuario'].indexOf(u.rol)] || '#95a5a6'};">
+              ${u.email[0].toUpperCase()}
+            </div>
+            <div class="user-info-card">
+              <h4>${u.email}</h4>
+              <p>${u.nombre}</p>
+              <span class="badge badge-${u.rol === 'admin' ? 'danger' : u.rol === 'doctor' ? 'info' : 'success'}">
+                ${u.rol === 'admin' ? '⚡ Admin' : u.rol === 'doctor' ? '👨‍⚕️ Doctor' : '👤 Recepción'}
+              </span>
+            </div>
+            <span class="estado-badge ${u.estado ? 'activo' : 'inactivo'}">
+              ${u.estado ? '✓ Activo' : '✕ Inactivo'}
+            </span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon" onclick="editarUsuario('${u.id}')" title="Editar">✏️</button>
+            <button class="btn-icon" onclick="toggleUsuarioEstado('${u.id}')" title="Activar/Desactivar">
+              ${u.estado ? '🔒' : '🔓'}
+            </button>
+            <button class="btn-icon danger" onclick="eliminarUsuarioUI('${u.id}')" title="Eliminar">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function abrirFormularioUsuario() {
+      document.getElementById('idUsuario').value = '';
+      document.getElementById('formUsuario').reset();
+      document.getElementById('modalUsuario').style.display = 'flex';
+    }
+
+    function cerrarModalUsuario() {
+      document.getElementById('modalUsuario').style.display = 'none';
+    }
+
+    function guardarFormularioUsuario() {
+      const id = document.getElementById('idUsuario').value;
+      const email = document.getElementById('emailUsuario').value;
+      const password = document.getElementById('passwordUsuario').value;
+      const nombre = document.getElementById('nombreUsuario').value;
+      const rol = document.getElementById('rolUsuario').value;
+
+      if (!email || !password || !nombre || !rol) {
+        alert('⚠️ Completa todos los campos');
+        return;
+      }
+
+      if (id) {
+        const usuarios = getUsuarios();
+        const usuario = usuarios.find(u => u.id === id);
+        if (usuario) {
+          usuario.nombre = nombre;
+          usuario.rol = rol;
+          if (password) usuario.password = password;
+          localStorage.setItem('pompeya_usuarios', JSON.stringify(usuarios));
+          mostrarAlerta('✅ Usuario actualizado', 'success');
+        }
+      } else {
+        crearUsuario(email, password, nombre, rol);
+        mostrarAlerta('✅ Usuario creado', 'success');
+      }
+
+      cerrarModalUsuario();
+      cargarUsuarios();
+    }
+
+    function editarUsuario(id) {
+      const usuario = getUsuarioById(id);
+      if (usuario) {
+        document.getElementById('idUsuario').value = id;
+        document.getElementById('emailUsuario').value = usuario.email;
+        document.getElementById('nombreUsuario').value = usuario.nombre || '';
+        document.getElementById('rolUsuario').value = usuario.rol;
+        document.getElementById('modalUsuario').style.display = 'flex';
+      }
+    }
+
+    function toggleUsuarioEstado(id) {
+      const usuario = getUsuarioById(id);
+      if (usuario) {
+        if (usuario.estado) {
+          desactivarUsuario(id);
+        } else {
+          const usuarios = getUsuarios();
+          const u = usuarios.find(x => x.id === id);
+          if (u) u.estado = true;
+          localStorage.setItem('pompeya_usuarios', JSON.stringify(usuarios));
+        }
+        cargarUsuarios();
+      }
+    }
+
+    function eliminarUsuarioUI(id) {
+      if (confirm('¿Eliminar este usuario?')) {
+        eliminarUsuario(id);
+        mostrarAlerta('✅ Usuario eliminado', 'success');
+        cargarUsuarios();
+      }
+    }
+
+    function agregarUsuariosDePrueba() {
+      const existentes = getUsuarios().length;
+      if (existentes > 3) return;
+
+      crearUsuario('soporte@pompeya.local', 'soporte123', 'Soporte', 'usuario');
+      crearUsuario('staff@pompeya.local', 'staff123', 'Staff', 'usuario');
+      mostrarAlerta('✅ Usuarios de prueba agregados', 'success');
+      cargarUsuarios();
+    }
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) window.location.href = '../login.html';
+      actualizarInfoUsuario();
+      actualizarFecha();
+      cargarUsuarios();
+    });
+  </script>
+</body>
+</html>

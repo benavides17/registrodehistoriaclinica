@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asistencia - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="nueva.html" class="nav-link">＋ Nueva Historia</a>
+        <a href="pacientes.html" class="nav-link">◉ Pacientes</a>
+        <a href="nuevo-paciente.html" class="nav-link">👤 Nuevo Paciente</a>
+        <a href="citas.html" class="nav-link">📅 Citas</a>
+        <a href="asistencia.html" class="nav-link active">✓ Asistencia</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">R</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Recepción</div>
+            <div class="user-name" id="userName">recepcion</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Registro de Asistencia</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>✓ Control de Asistencia</h1>
+          <p>Registra la asistencia de pacientes a sus citas</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" onclick="mostrarCitasHoy()">📅 Citas de Hoy</button>
+          <button class="btn btn-secondary" onclick="mostrarCitasProximas()">➡️ Próximas Citas</button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+          <input type="date" id="fechaFiltro" onchange="cargarCitasPorFecha()">
+          <select id="estadoFiltro" onchange="filtrarCitas()">
+            <option value="">Todos los estados</option>
+            <option value="programada">Programada</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="asistió">Asistió</option>
+            <option value="no-asistió">No asistió</option>
+          </select>
+        </div>
+
+        <!-- Tabla de Citas -->
+        <div class="section">
+          <h3 id="tituloSeccion">Citas Programadas</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Doctor</th>
+                <th>Hora</th>
+                <th>Motivo</th>
+                <th>Estado Cita</th>
+                <th>Asistencia</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCitas">
+              <!-- Se llena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Modal Registrar Asistencia -->
+        <div id="modalAsistencia" class="modal-overlay" onclick="cerrarModalAsistencia()">
+          <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Registrar Asistencia</h3>
+              <button class="close-btn" onclick="cerrarModalAsistencia()">✕</button>
+            </div>
+            <form id="formAsistencia" class="form-grid">
+              <input type="hidden" id="citaIdAsistencia">
+              
+              <label for="estadoAsistencia">¿El paciente asistió?</label>
+              <select id="estadoAsistencia" required>
+                <option value="">Seleccionar</option>
+                <option value="asistió">✓ Asistió</option>
+                <option value="no-asistió">✕ No asistió</option>
+                <option value="reprogramada">↻ Reprogramada</option>
+              </select>
+
+              <label for="notasAsistencia">Notas (opcional)</label>
+              <textarea id="notasAsistencia" placeholder="Observaciones sobre la asistencia..." style="grid-column: 1/-1;"></textarea>
+
+              <div style="grid-column: 1/-1; display: flex; gap: 10px;">
+                <button type="button" class="btn btn-success" onclick="guardarAsistencia()">✓ Registrar</button>
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalAsistencia()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Resumen del Día -->
+        <div class="resumen-section">
+          <h3>Resumen de Hoy</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number" id="citasHoyTotal">0</div>
+              <div class="stat-label">Citas programadas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="citasAsistieron">0</div>
+              <div class="stat-label">Asistieron</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="citasNoAsistieron">0</div>
+              <div class="stat-label">No asistieron</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="citasReprogramadas">0</div>
+              <div class="stat-label">Reprogramadas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    // Verificar que sea personal de recepción
+    const usuarioActual = obtenerUsuarioActual();
+    if (usuarioActual.rol !== 'usuario') {
+      // Permitir que otros roles también accedan
+      // alert('⛔ Esta sección es principalmente para recepción.');
+    }
+
+    let citasActuales = [];
+
+    function mostrarCitasHoy() {
+      citasActuales = getCitasHoy();
+      mostrarTablaCitas(citasActuales);
+      document.getElementById('tituloSeccion').textContent = 'Citas de Hoy';
+      actualizarResumen();
+    }
+
+    function mostrarCitasProximas() {
+      citasActuales = getCitasProximas(30);
+      mostrarTablaCitas(citasActuales);
+      document.getElementById('tituloSeccion').textContent = 'Próximas Citas (30 días)';
+    }
+
+    function mostrarTablaCitas(citas) {
+      const tbody = document.getElementById('tbodyCitas');
+      
+      if (citas.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Sin citas</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = citas.map(c => {
+        const asistencia = getAsistenciaByCita(c.id);
+        return `
+          <tr>
+            <td><strong>${c.pacienteNombre}</strong></td>
+            <td>${c.doctorNombre || '—'}</td>
+            <td>${c.hora || '—'}</td>
+            <td>${c.motivo}</td>
+            <td><span class="status-badge status-${c.estado}">${c.estado}</span></td>
+            <td>
+              ${asistencia ? `
+                <span class="badge badge-${asistencia.estado === 'asistió' ? 'success' : 'danger'}">
+                  ${asistencia.estado === 'asistió' ? '✓ Asistió' : asistencia.estado === 'no-asistió' ? '✕ No asistió' : '↻ Reprogramada'}
+                </span>
+              ` : '<span class="badge badge-warning">Pendiente</span>'}
+            </td>
+            <td>
+              <button class="btn-icon" onclick="abrirRegistroAsistencia('${c.id}')" title="Registrar">✓</button>
+              <button class="btn-icon" onclick="editarCita('${c.id}')" title="Editar">✏️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function cargarCitasPorFecha() {
+      const fecha = document.getElementById('fechaFiltro').value;
+      if (!fecha) {
+        mostrarCitasHoy();
+        return;
+      }
+
+      const citas = getCitas().filter(c => c.fecha === fecha);
+      mostrarTablaCitas(citas);
+    }
+
+    function filtrarCitas() {
+      const estado = document.getElementById('estadoFiltro').value;
+      if (!estado) {
+        mostrarCitasHoy();
+        return;
+      }
+
+      const asistencias = getAsistencia();
+      const citasFiltradasIds = asistencias
+        .filter(a => a.estado === estado)
+        .map(a => a.citaId);
+
+      const citas = citasFiltradasIds.map(id => getCitaById(id)).filter(c => c);
+      mostrarTablaCitas(citas);
+    }
+
+    function abrirRegistroAsistencia(citaId) {
+      document.getElementById('citaIdAsistencia').value = citaId;
+      document.getElementById('estadoAsistencia').value = '';
+      document.getElementById('notasAsistencia').value = '';
+      document.getElementById('modalAsistencia').style.display = 'flex';
+    }
+
+    function cerrarModalAsistencia() {
+      document.getElementById('modalAsistencia').style.display = 'none';
+    }
+
+    function guardarAsistencia() {
+      const citaId = document.getElementById('citaIdAsistencia').value;
+      const estado = document.getElementById('estadoAsistencia').value;
+      const notas = document.getElementById('notasAsistencia').value;
+
+      if (!estado) {
+        alert('⚠️ Selecciona un estado de asistencia');
+        return;
+      }
+
+      registrarAsistencia(citaId, estado);
+      mostrarAlerta('✅ Asistencia registrada', 'success');
+      cerrarModalAsistencia();
+      mostrarCitasHoy();
+    }
+
+    function editarCita(citaId) {
+      const cita = getCitaById(citaId);
+      if (cita) {
+        alert(`Cita: ${cita.pacienteNombre}\nDoctor: ${cita.doctorNombre}\nFecha: ${cita.fecha}\nHora: ${cita.hora}`);
+      }
+    }
+
+    function actualizarResumen() {
+      const asistencias = getAsistencia();
+      const hoy = new Date().toISOString().split('T')[0];
+      const citasHoy = getCitasHoy();
+
+      const asistioHoy = asistencias.filter(a => {
+        const cita = getCitaById(a.citaId);
+        return cita && cita.fecha === hoy && a.estado === 'asistió';
+      }).length;
+
+      const noAsistioHoy = asistencias.filter(a => {
+        const cita = getCitaById(a.citaId);
+        return cita && cita.fecha === hoy && a.estado === 'no-asistió';
+      }).length;
+
+      const reprogramadaHoy = asistencias.filter(a => {
+        const cita = getCitaById(a.citaId);
+        return cita && cita.fecha === hoy && a.estado === 'reprogramada';
+      }).length;
+
+      document.getElementById('citasHoyTotal').textContent = citasHoy.length;
+      document.getElementById('citasAsistieron').textContent = asistioHoy;
+      document.getElementById('citasNoAsistieron').textContent = noAsistioHoy;
+      document.getElementById('citasReprogramadas').textContent = reprogramadaHoy;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) window.location.href = '../login.html';
+      actualizarInfoUsuario();
+      actualizarFecha();
+      
+      // Establecer fecha de hoy en el filtro
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fechaFiltro').value = hoy;
+      
+      mostrarCitasHoy();
+    });
+  </script>
+
+  <style>
+    .filter-section {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f4f1ec;
+      border-radius: 8px;
+    }
+
+    .filter-section input,
+    .filter-section select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .resumen-section {
+      margin-top: 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .resumen-section h3 {
+      margin-bottom: 20px;
+      color: #1a5c8a;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+  </style>
+</body>
+</html>

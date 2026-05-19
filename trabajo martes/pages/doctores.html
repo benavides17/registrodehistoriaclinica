@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctores — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="../" class="nav-item">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="nueva.html" class="nav-item">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>
+      <a href="doctores.html" class="nav-item active">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>
+      <a href="buscar.html" class="nav-item">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-role" id="userRole">Rol</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesionUI()" style="width: 100%; margin-top: 10px; padding: 8px; background: #f4f1ec; border: 1px solid #d9cfc4; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Gestión de Doctores</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <div style="margin-bottom: 30px;">
+        <h1>👨‍⚕️ Doctores Registrados</h1>
+        <p style="color: #8a8680;">Gestiona los doctores de la clínica</p>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button class="action-btn primary" onclick="abrirFormularioDoctor()">
+          <span>＋</span> Nuevo Doctor
+        </button>
+        <button class="action-btn secondary" onclick="agregarDoctoresDePrueba()">
+          <span>📋</span> Agregar Pruebas
+        </button>
+      </div>
+
+      <div id="listaDoctores" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        <p style="color: #8a8680;">No hay doctores registrados. <a href="#" onclick="abrirFormularioDoctor(); return false;">Crear uno</a></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL FORMULARIO -->
+  <div id="modalFormularioDoctor" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="cerrarFormularioDoctor()"></div>
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Nuevo Doctor</h2>
+        <button class="modal-close" onclick="cerrarFormularioDoctor()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formDoctor" onsubmit="guardarFormularioDoctor(event)">
+          <input type="hidden" id="idDoctor" />
+
+          <div class="form-group">
+            <label>Nombre Completo *</label>
+            <input type="text" id="nombreDoctor" placeholder="Dr. Juan García" required />
+          </div>
+
+          <div class="form-group">
+            <label>Especialidad *</label>
+            <input type="text" id="especialidadDoctor" placeholder="Ej. Cardiología, Pediatría" required />
+          </div>
+
+          <div class="form-group">
+            <label>Cédula Profesional *</label>
+            <input type="text" id="cedulaDoctor" placeholder="Ej. 12345678" required />
+          </div>
+
+          <div class="form-group">
+            <label>Correo Electrónico *</label>
+            <input type="email" id="emailDoctor" placeholder="doctor@ejemplo.com" required />
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" id="telefonoDoctor" placeholder="300 123 4567" />
+          </div>
+
+          <div class="form-group">
+            <label>Horario de Atención</label>
+            <input type="text" id="horarioDoctor" placeholder="Lun-Vie 8am-5pm" />
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            <button type="button" class="btn btn-ghost" onclick="cerrarFormularioDoctor()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script>
+    // Verificar autenticación
+    if (!estaAutenticado()) {
+      window.location.href = '../login.html';
+      throw new Error('No autenticado');
+    }
+
+    // Verificar permisos (solo admin)
+    if (!esAdmin()) {
+      alert('⛔ Solo administradores pueden gestionar doctores');
+      window.location.href = '../';
+      throw new Error('Sin permisos');
+    }
+
+    // Mostrar información del usuario
+    function mostrarUsuarioActual() {
+      const usuario = obtenerUsuarioActual();
+      if (usuario) {
+        document.getElementById('userName').textContent = usuario.nombre;
+        document.getElementById('userRole').textContent = usuario.rol;
+        document.getElementById('userAvatar').textContent = usuario.nombre.charAt(0).toUpperCase();
+      }
+    }
+
+    function cerrarSesionUI() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        cerrarSesion();
+        window.location.href = '../login.html';
+      }
+    }
+
+    function cargarDoctores() {
+      const listaDoctores = document.getElementById('listaDoctores');
+      const doctores = getDoctores();
+
+      if (doctores.length === 0) {
+        listaDoctores.innerHTML = '<p style="grid-column: 1/-1; color: #8a8680;">No hay doctores registrados. <a href="#" onclick="abrirFormularioDoctor(); return false;">Crear uno</a></p>';
+        return;
+      }
+
+      listaDoctores.innerHTML = doctores.map(doc => `
+        <div class="doctor-card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid ${doc.estado ? '#e8e3db' : '#ffcccc'};">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #1a5c8a 0%, #0f3d5c 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
+              ${doc.nombre.charAt(0).toUpperCase()}
+            </div>
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 16px; color: #1c1a17;">${doc.nombre}</div>
+              <div style="font-size: 13px; color: #1a5c8a; font-weight: 500;">${doc.especialidad || 'Especialidad no especificada'}</div>
+            </div>
+            <div style="text-align: center;">
+              <span style="background: ${doc.estado ? '#d4edda' : '#f8d7da'}; color: ${doc.estado ? '#1a7a3f' : '#8a4444'}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+                ${doc.estado ? '✓ Activo' : '✗ Inactivo'}
+              </span>
+            </div>
+          </div>
+
+          <div style="background: #f9f8f7; border-radius: 8px; padding: 12px; margin-bottom: 15px; font-size: 13px;">
+            <div style="margin-bottom: 6px;"><strong>📧 Email:</strong> ${doc.email}</div>
+            <div style="margin-bottom: 6px;"><strong>📱 Teléfono:</strong> ${doc.telefono || 'No especificado'}</div>
+            <div style="margin-bottom: 6px;"><strong>🏥 Cédula:</strong> ${doc.cedula || 'No especificada'}</div>
+            ${doc.horario ? `<div><strong>🕐 Horario:</strong> ${doc.horario}</div>` : ''}
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="editarDoctor('${doc.id}')">✏️ Editar</button>
+            <button class="btn ${doc.estado ? 'btn-warning' : 'btn-success'}" style="flex: 1;" onclick="toggleEstadoDoctor('${doc.id}')">
+              ${doc.estado ? '🔒 Desactivar' : '🔓 Activar'}
+            </button>
+            <button class="btn btn-danger" style="flex: 1;" onclick="eliminarDoctorUI('${doc.id}')">🗑️ Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function abrirFormularioDoctor() {
+      document.getElementById('idDoctor').value = '';
+      document.getElementById('modalTitulo').textContent = 'Nuevo Doctor';
+      document.getElementById('formDoctor').reset();
+      document.getElementById('modalFormularioDoctor').style.display = 'flex';
+    }
+
+    function editarDoctor(id) {
+      const doctor = getDoctorById(id);
+      if (!doctor) return;
+
+      document.getElementById('idDoctor').value = doctor.id;
+      document.getElementById('modalTitulo').textContent = 'Editar Doctor';
+      document.getElementById('nombreDoctor').value = doctor.nombre;
+      document.getElementById('especialidadDoctor').value = doctor.especialidad || '';
+      document.getElementById('cedulaDoctor').value = doctor.cedula || '';
+      document.getElementById('emailDoctor').value = doctor.email;
+      document.getElementById('telefonoDoctor').value = doctor.telefono || '';
+      document.getElementById('horarioDoctor').value = doctor.horario || '';
+      document.getElementById('modalFormularioDoctor').style.display = 'flex';
+    }
+
+    function cerrarFormularioDoctor() {
+      document.getElementById('modalFormularioDoctor').style.display = 'none';
+      document.getElementById('formDoctor').reset();
+    }
+
+    function guardarFormularioDoctor(event) {
+      event.preventDefault();
+
+      const idDoctor = document.getElementById('idDoctor').value;
+      const datos = {
+        nombre: document.getElementById('nombreDoctor').value.trim(),
+        especialidad: document.getElementById('especialidadDoctor').value.trim(),
+        cedula: document.getElementById('cedulaDoctor').value.trim(),
+        email: document.getElementById('emailDoctor').value.trim(),
+        telefono: document.getElementById('telefonoDoctor').value.trim(),
+        horario: document.getElementById('horarioDoctor').value.trim()
+      };
+
+      if (!datos.nombre || !datos.especialidad || !datos.cedula || !datos.email) {
+        alert('⚠️ Completa todos los campos requeridos');
+        return;
+      }
+
+      if (idDoctor) {
+        actualizarDoctor(idDoctor, datos);
+        alert('✅ Doctor actualizado correctamente');
+      } else {
+        crearDoctor(datos);
+        alert('✅ Doctor creado correctamente');
+      }
+
+      cerrarFormularioDoctor();
+      cargarDoctores();
+    }
+
+    function eliminarDoctorUI(id) {
+      if (confirm('⚠️ ¿Eliminar este doctor permanentemente?')) {
+        eliminarDoctor(id);
+        alert('✅ Doctor eliminado');
+        cargarDoctores();
+      }
+    }
+
+    function toggleEstadoDoctor(id) {
+      const doctor = getDoctorById(id);
+      if (!doctor) return;
+
+      if (doctor.estado) {
+        desactivarDoctor(id);
+        alert('✅ Doctor desactivado');
+      } else {
+        activarDoctor(id);
+        alert('✅ Doctor activado');
+      }
+      cargarDoctores();
+    }
+
+    function agregarDoctoresDePrueba() {
+      if (getDoctores().length === 0) {
+        crearDoctor({
+          nombre: 'Dr. Carlos González',
+          especialidad: 'Cardiología',
+          cedula: '1234567890',
+          email: 'carlos@pompeya.local',
+          telefono: '300 123 4567',
+          horario: 'Lun-Vie 8am-5pm'
+        });
+
+        crearDoctor({
+          nombre: 'Dra. María Martínez',
+          especialidad: 'Pediatría',
+          cedula: '0987654321',
+          email: 'maria@pompeya.local',
+          telefono: '301 234 5678',
+          horario: 'Lun-Sab 9am-6pm'
+        });
+
+        crearDoctor({
+          nombre: 'Dr. Luis López',
+          especialidad: 'Medicina General',
+          cedula: '5555555555',
+          email: 'luis@pompeya.local',
+          telefono: '302 345 6789',
+          horario: 'Lun-Vie 7am-3pm'
+        });
+
+        alert('✅ Doctores de prueba agregados');
+        cargarDoctores();
+      } else {
+        alert('ℹ️ Ya hay doctores en el sistema');
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Inicializar
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    mostrarUsuarioActual();
+    cargarDoctores();
+  </script>
+</body>
+</html>

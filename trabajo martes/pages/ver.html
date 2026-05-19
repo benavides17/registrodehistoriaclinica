@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ver Historia — Pompeya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HC</div>
+      <div>
+        <div class="brand-name">Pompeya</div>
+        <div class="brand-sub">Historias Clínicas</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="../" class="nav-item">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="nueva.html" class="nav-item">
+        <span class="nav-icon">＋</span> Nueva Historia
+      </a>
+      <a href="pacientes.html" class="nav-item">
+        <span class="nav-icon">◉</span> Pacientes
+      </a>      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>      <a href="doctores.html" class="nav-item">
+        <span class="nav-icon">👨‍⚕️</span> Doctores
+      </a>
+      <a href="citas.html" class="nav-item">
+        <span class="nav-icon">📅</span> Citas
+      </a>
+      <a href="buscar.html" class="nav-item">
+        <span class="nav-icon">◎</span> Buscar
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-role" id="userRole">Rol</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesionUI()" style="width: 100%; margin-top: 10px; padding: 8px; background: #f4f1ec; border: 1px solid #d9cfc4; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">Detalles de Historia</div>
+      <div class="topbar-date" id="fechaHoy"></div>
+    </header>
+
+    <div class="content">
+      <div id="detalleHistoria"></div>
+    </div>
+  </main>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    // Verificar autenticación
+    if (!estaAutenticado()) {
+      window.location.href = '../login.html';
+      throw new Error('No autenticado');
+    }
+
+    // Mostrar información del usuario
+    function mostrarUsuarioActual() {
+      const usuario = obtenerUsuarioActual();
+      if (usuario) {
+        document.getElementById('userName').textContent = usuario.nombre;
+        document.getElementById('userRole').textContent = usuario.rol;
+        document.getElementById('userAvatar').textContent = usuario.nombre.charAt(0).toUpperCase();
+      }
+    }
+
+    function cerrarSesionUI() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        cerrarSesion();
+        window.location.href = '../login.html';
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+      weekday:'long', year:'numeric', month:'long', day:'numeric'
+    });
+
+    const id = obtenerParametroURL('id');
+    if (id) {
+      const historia = getHistoriaById(id);
+      if (historia) {
+        const contenedor = document.getElementById('detalleHistoria');
+        contenedor.innerHTML = `
+          <div class="page-header">
+            <h1>${historia.pacienteNombre}</h1>
+            <p>Historia Clínica • ${formatearFechaHora(historia.fechaCreacion)}</p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Información General</div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Nombre del Paciente</label>
+                <div class="val">${historia.pacienteNombre || '—'}</div>
+              </div>
+              <div class="detail-item">
+                <label>Documento</label>
+                <div class="val">${historia.pacienteDoc || '—'}</div>
+              </div>
+              <div class="detail-item">
+                <label>Motivo de Consulta</label>
+                <div class="val">${historia.motivo || '—'}</div>
+              </div>
+              <div class="detail-item">
+                <label>Médico Tratante</label>
+                <div class="val">${historia.medico || '—'}</div>
+              </div>
+              <div class="detail-item">
+                <label>Fecha de Creación</label>
+                <div class="val">${formatearFechaHora(historia.fechaCreacion)}</div>
+              </div>
+              <div class="detail-item">
+                <label>ID Único</label>
+                <div class="val">${historia.id}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Diagnóstico y Tratamiento</div>
+            <div class="detail-section">
+              <label>Diagnóstico</label>
+              <div class="val">${historia.diagnostico || 'No especificado'}</div>
+            </div>
+            <div class="detail-section">
+              <label>Tratamiento Recomendado</label>
+              <div class="val">${historia.tratamiento || 'No especificado'}</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="../" class="btn btn-primary">← Volver al Dashboard</a>
+            <button class="btn btn-danger" onclick="eliminarHistoriaUI('${historia.id}')">🗑️ Eliminar</button>
+          </div>
+        `;
+      } else {
+        document.getElementById('detalleHistoria').innerHTML = '<p>Historia no encontrada</p>';
+      }
+    }
+
+    mostrarUsuarioActual();
+  </script>
+</body>
+</html>

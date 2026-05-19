@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Pacientes - Pompeya</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">HC</span>
+        <div class="logo-text">
+          <h1>Pompeya</h1>
+          <p>Historias Clínicas</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="../" class="nav-link">◈ Dashboard</a>
+        <a href="nueva.html" class="nav-link">＋ Nueva Historia</a>
+        <a href="mis-citas.html" class="nav-link">📅 Mis Citas</a>
+        <a href="mis-pacientes.html" class="nav-link active">👥 Mis Pacientes</a>
+        <a href="mi-perfil.html" class="nav-link">👤 Mi Perfil</a>
+        <a href="reportes.html" class="nav-link">📊 Reportes</a>
+        <a href="buscar.html" class="nav-link">◎ Buscar</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">D</div>
+          <div class="user-details">
+            <div class="user-role" id="userRole">Doctor</div>
+            <div class="user-name" id="userName">doctor</div>
+          </div>
+        </div>
+        <button onclick="cerrarSesionUI()" class="logout-btn">🚪 Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <h2>Mis Pacientes</h2>
+        <span class="date" id="fecha"></span>
+      </div>
+
+      <div class="content">
+        <div class="section-header">
+          <h1>👥 Pacientes Atendidos</h1>
+          <p>Historial de pacientes que has atendido</p>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" id="busquedaPacientes" placeholder="🔍 Buscar paciente..." onkeyup="filtrarMisPacientes()">
+        </div>
+
+        <div class="patients-list" id="listaMisPacientes">
+          <!-- Se llena dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Modal Ver Historial -->
+      <div id="modalHistorial" class="modal-overlay" onclick="cerrarModalHistorial()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3 id="pacienteNombreModal">Historial de Paciente</h3>
+            <button class="close-btn" onclick="cerrarModalHistorial()">✕</button>
+          </div>
+          <div id="historialPaciente" class="historial-content">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    if (!esDoctor()) {
+      alert('⛔ Esta sección es solo para doctores.');
+      window.location.href = '../';
+    }
+
+    const usuarioActual = obtenerUsuarioActual();
+    const doctorId = usuarioActual.id;
+
+    function cargarMisPacientes() {
+      const pacientes = getPacientesPorDoctor(doctorId);
+      mostrarListaPacientes(pacientes);
+    }
+
+    function mostrarListaPacientes(pacientes) {
+      const lista = document.getElementById('listaMisPacientes');
+      
+      if (pacientes.length === 0) {
+        lista.innerHTML = '<p class="empty-state">Sin pacientes registrados aún</p>';
+        return;
+      }
+
+      lista.innerHTML = pacientes.map(p => `
+        <div class="patient-card">
+          <div class="card-avatar">${p.nombre[0].toUpperCase()}</div>
+          <div class="card-info">
+            <h4>${p.nombre}</h4>
+            <p>📋 Doc: ${p.documento}</p>
+            <p>📱 ${p.telefono || '—'}</p>
+            <p>🩸 ${p.tipoSangre || 'No especificado'}</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-small" onclick="verHistorialPaciente('${p.id}', '${p.nombre}')">Ver Historial</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filtrarMisPacientes() {
+      const query = document.getElementById('busquedaPacientes').value.toLowerCase();
+      const pacientes = getPacientesPorDoctor(doctorId).filter(p =>
+        p.nombre.toLowerCase().includes(query) ||
+        p.documento.toLowerCase().includes(query) ||
+        (p.telefono || '').toLowerCase().includes(query)
+      );
+      mostrarListaPacientes(pacientes);
+    }
+
+    function verHistorialPaciente(pacienteId, pacienteNombre) {
+      const historias = getHistorias().filter(h => h.pacienteId === pacienteId || h.pacienteDoc === getPacienteById(pacienteId)?.documento);
+      const citas = getCitas().filter(c => c.pacienteId === pacienteId);
+
+      document.getElementById('pacienteNombreModal').textContent = pacienteNombre;
+      document.getElementById('historialPaciente').innerHTML = `
+        <div class="historial-section">
+          <h4>Citas Registradas</h4>
+          ${citas.length === 0 ? '<p>Sin citas</p>' : `
+            <ul>
+              ${citas.map(c => `<li>${formatearFechaHora(c.fecha + 'T' + c.hora)} - ${c.motivo} (${c.estado})</li>`).join('')}
+            </ul>
+          `}
+        </div>
+        <div class="historial-section">
+          <h4>Historias Clínicas</h4>
+          ${historias.length === 0 ? '<p>Sin historias</p>' : `
+            <ul>
+              ${historias.map(h => `<li>${formatearFecha(h.fechaCreacion)} - ${h.motivo}</li>`).join('')}
+            </ul>
+          `}
+        </div>
+      `;
+      document.getElementById('modalHistorial').style.display = 'flex';
+    }
+
+    function cerrarModalHistorial() {
+      document.getElementById('modalHistorial').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!estaAutenticado()) window.location.href = '../login.html';
+      actualizarInfoUsuario();
+      actualizarFecha();
+      cargarMisPacientes();
+    });
+  </script>
+</body>
+</html>
